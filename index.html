@@ -95,6 +95,16 @@
                 }
             }
 
+            function paddleHasCollision() {
+                if (paddlePositionX <= 0) {
+                    paddlePositionX = 0;
+                }
+
+                if (paddlePositionX + paddleWidth >= canvasWidth) {
+                    paddlePositionX = canvasWidth - paddleWidth;
+                }
+            }
+
             function gameLoop() {
                 ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
@@ -102,6 +112,7 @@
                 drawPaddle();
 
                 paddleHasMove();
+                paddleHasCollision();
                 ballHasCollision();
 
                 ballPositionX += ballDirectionX;
