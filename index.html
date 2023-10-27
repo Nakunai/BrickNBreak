@@ -1,86 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>Brick'n Break</title>
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-        }
-        canvas {
-            background: #9cf9ff;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
-</head>
-<body>
-<canvas id="gameCanvas" height="320" width="480"></canvas>
-<script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    <head>
+        <meta charset="utf-8" />
+        <title>Brick'n Break</title>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
+            canvas {
+                background: #9cf9ff;
+                display: block;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="gameCanvas" height="320" width="480"></canvas>
+        <script>
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
 
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
 
-    const ballRadius = 10;
-    const ballDirectionsX = [2, -2];
+            const ballRadius = 10;
+            const ballDirectionsX = [2, -2];
 
-    const paddleWidth = 90;
-    const paddleHeight = 12;
+            const paddleWidth = 90;
+            const paddleHeight = 12;
+            const paddleMoveRatio = 6;
 
-    let paddlePositionX = canvasWidth / 2 - paddleWidth / 2;
-    let paddlePositionY = canvasHeight - 30;
+            let paddlePositionX = canvasWidth / 2 - paddleWidth / 2;
+            let paddlePositionY = canvasHeight - 30;
 
-    let ballPositionX = canvasWidth / 2;
-    let ballPositionY = paddlePositionY - ballRadius;
-    let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
-    let ballDirectionY = -2;
+            let ballPositionX = canvasWidth / 2;
+            let ballPositionY = paddlePositionY - ballRadius;
+            let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
+            let ballDirectionY = -2;
 
-    function drawBall() {
-        ctx.beginPath();
+            let arrowKeyLeftIsDown = false;
+            let arrowKeyRightIsDown = false;
 
-        ctx.fillStyle = "red";
-        ctx.arc(ballPositionX, ballPositionY, ballRadius, 0, Math.PI * 2);
-        ctx.fill();
+            function keyHandler(event) {
+                let type = event.type;
+                let key = event.key;
 
-        ctx.closePath();
-    }
+                if ('ArrowLeft' === key) {
+                    arrowKeyLeftIsDown = type === 'keydown';
+                }
 
-    function drawPaddle() {
-        ctx.beginPath();
+                if ('ArrowRight' === key) {
+                    arrowKeyRightIsDown = type === 'keydown';
+                }
+            }
 
-        ctx.fillStyle = "black";
-        ctx.rect(paddlePositionX, paddlePositionY, paddleWidth, paddleHeight)
-        ctx.fill();
+            function drawBall() {
+                ctx.beginPath();
 
-        ctx.closePath();
-    }
+                ctx.fillStyle = "red";
+                ctx.arc(ballPositionX, ballPositionY, ballRadius, 0, Math.PI * 2);
+                ctx.fill();
 
-    function ballHasCollision() {
-        if (ballPositionX + ballRadius >= canvasWidth || ballPositionX - ballRadius <= 0) {
-            ballDirectionX = -ballDirectionX;
-        }
+                ctx.closePath();
+            }
 
-        if (ballPositionY + ballRadius >= canvasHeight || ballPositionY - ballRadius <= 0) {
-            ballDirectionY = -ballDirectionY;
-        }
-    }
+            function drawPaddle() {
+                ctx.beginPath();
 
-    function gameLoop() {
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                ctx.fillStyle = "black";
+                ctx.rect(paddlePositionX, paddlePositionY, paddleWidth, paddleHeight)
+                ctx.fill();
 
-        drawBall();
-        drawPaddle();
+                ctx.closePath();
+            }
 
-        ballHasCollision();
+            function ballHasCollision() {
+                if (ballPositionX + ballRadius >= canvasWidth || ballPositionX - ballRadius <= 0) {
+                    ballDirectionX = -ballDirectionX;
+                }
 
-        ballPositionX += ballDirectionX;
-        ballPositionY += ballDirectionY;
-    }
+                if (ballPositionY + ballRadius >= canvasHeight || ballPositionY - ballRadius <= 0) {
+                    ballDirectionY = -ballDirectionY;
+                }
+            }
 
-    let interval = setInterval(gameLoop, 10);
-</script>
-</body>
+            function paddleHasMove() {
+                if (arrowKeyLeftIsDown) {
+                    paddlePositionX -= paddleMoveRatio;
+                }
+
+                if (arrowKeyRightIsDown) {
+                    paddlePositionX += paddleMoveRatio;
+                }
+            }
+
+            function gameLoop() {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+                drawBall();
+                drawPaddle();
+
+                paddleHasMove();
+                ballHasCollision();
+
+                ballPositionX += ballDirectionX;
+                ballPositionY += ballDirectionY;
+            }
+
+            let interval = setInterval(gameLoop, 10);
+
+            document.addEventListener('keydown', keyHandler);
+            document.addEventListener('keyup', keyHandler);
+        </script>
+    </body>
 </html>
