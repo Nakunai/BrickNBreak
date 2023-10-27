@@ -27,8 +27,14 @@
     const ballRadius = 10;
     const ballDirectionsX = [2, -2];
 
+    const paddleWidth = 90;
+    const paddleHeight = 12;
+
+    let paddlePositionX = canvasWidth / 2 - paddleWidth / 2;
+    let paddlePositionY = canvasHeight - 30;
+
     let ballPositionX = canvasWidth / 2;
-    let ballPositionY = canvasHeight - 30;
+    let ballPositionY = paddlePositionY - ballRadius;
     let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
     let ballDirectionY = -2;
 
@@ -37,6 +43,16 @@
 
         ctx.fillStyle = "red";
         ctx.arc(ballPositionX, ballPositionY, ballRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.closePath();
+    }
+
+    function drawPaddle() {
+        ctx.beginPath();
+
+        ctx.fillStyle = "black";
+        ctx.rect(paddlePositionX, paddlePositionY, paddleWidth, paddleHeight)
         ctx.fill();
 
         ctx.closePath();
@@ -56,6 +72,8 @@
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         drawBall();
+        drawPaddle();
+
         ballHasCollision();
 
         ballPositionX += ballDirectionX;
