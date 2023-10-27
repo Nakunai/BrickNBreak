@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Brick'n Break</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+        canvas {
+            background: #9cf9ff;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas" height="320" width="480"></canvas>
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    const ballRadius = 10;
+    const ballDirectionsX = [2, -2];
+
+    let ballPositionX = canvasWidth / 2;
+    let ballPositionY = canvasHeight - 30;
+    let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
+    let ballDirectionY = -2;
+
+    function drawBall() {
+        ctx.beginPath();
+
+        ctx.fillStyle = "red";
+        ctx.arc(ballPositionX, ballPositionY, ballRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.closePath();
+    }
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        drawBall();
+
+        ballPositionX += ballDirectionX;
+        ballPositionY += ballDirectionY;
+    }
+
+    setInterval(gameLoop, 10);
+</script>
+</body>
+</html>
