@@ -42,15 +42,27 @@
         ctx.closePath();
     }
 
+    function ballHasCollision() {
+        if (ballPositionX + ballRadius >= canvasWidth || ballPositionX - ballRadius <= 0) {
+            ballDirectionX = -ballDirectionX;
+        }
+
+        if (ballPositionY + ballRadius >= canvasHeight || ballPositionY - ballRadius <= 0) {
+            ballDirectionY = -ballDirectionY;
+        }
+    }
+
     function gameLoop() {
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
         drawBall();
+        ballHasCollision();
 
         ballPositionX += ballDirectionX;
         ballPositionY += ballDirectionY;
     }
 
-    setInterval(gameLoop, 10);
+    let interval = setInterval(gameLoop, 10);
 </script>
 </body>
 </html>
