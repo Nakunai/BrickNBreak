@@ -9,6 +9,7 @@
                 margin: 0;
             }
             canvas {
+                background-color: rgb(156,249,255);
                 display: block;
                 margin: 0 auto;
             }
@@ -34,18 +35,27 @@
             const paddleHeight = 12;
             const paddleMoveRatio = 10;
 
+            const paddleInitPositionX = canvasWidth / 2 - paddleWidth / 2;
+            const paddleInitPositionY = canvasHeight - paddleHeight;
+
+            const ballInitPositionX = canvasWidth / 2;
+            const ballInitPositionY = paddleInitPositionY - paddleHeight;
             const ballInitDirectionY = -4;
 
-            let paddlePositionX = canvasWidth / 2 - paddleWidth / 2;
-            let paddlePositionY = canvasHeight - paddleHeight;
+            const livesInit = 3;
 
-            let ballPositionX = canvasWidth / 2;
-            let ballPositionY = paddlePositionY - paddleHeight;
+            let paddlePositionX = paddleInitPositionX;
+            let paddlePositionY = paddleInitPositionY;
+
+            let ballPositionX = ballInitPositionX;
+            let ballPositionY = ballInitPositionY;
             let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
             let ballDirectionY = ballInitDirectionY;
 
             let arrowKeyLeftIsDown = false;
             let arrowKeyRightIsDown = false;
+
+            let lives = livesInit;
 
             function keyHandler(event) {
                 let type = event.type;
@@ -58,6 +68,32 @@
                 if ('ArrowRight' === key) {
                     arrowKeyRightIsDown = type === 'keydown';
                 }
+            }
+
+            function resetPositions() {
+                paddlePositionX = paddleInitPositionX;
+                ballPositionX = ballInitPositionX;
+                ballPositionY = ballInitPositionY;
+                ballDirectionY = ballInitDirectionY;
+                ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
+            }
+
+            function drawLives() {
+                ctx.beginPath();
+
+                ctx.fillStyle = 'red';
+                ctx.bezierCurveTo(37.5, 18.5, 37.5, 12.5, 25, 12.5);
+                ctx.bezierCurveTo(10, 12.5, 10, 31, 10, 31);
+                ctx.bezierCurveTo(10, 40, 20, 51, 37.5, 60);
+                ctx.bezierCurveTo(55, 51, 65, 40, 65, 31);
+                ctx.bezierCurveTo(65, 31, 65, 12.5, 50, 12.5);
+                ctx.bezierCurveTo(42.5, 12.5, 37.5, 16.5, 37.5, 20);
+                ctx.fill();
+
+                ctx.font = "40px Impact";
+                ctx.fillText('x ' + lives, 70, 55);
+
+                ctx.closePath();
             }
 
             function drawBall() {
@@ -82,7 +118,13 @@
 
             function ballHasCollision() {
                 if (ballPositionY >= canvasHeight - ballRadius) {
-                    gameOver();
+                    lives--;
+
+                    if (lives === 0) {
+                        gameOver();
+                    }
+
+                    resetPositions();
                 }
 
                 if (ballPositionX >= canvasWidth - ballRadius || ballPositionX <= ballRadius) {
@@ -127,8 +169,9 @@
                 ctx.fillStyle = "rgba(156,249,255,0.3)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                drawBall();
+                drawLives();
                 drawPaddle();
+                drawBall();
 
                 paddleHasMove();
                 paddleHasCollision();
@@ -141,6 +184,7 @@
             function gameOver() {
                 ctx.beginPath();
 
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.font = "80px Impact";
                 ctx.textAlign = 'center'
                 ctx.fillStyle = "red";
