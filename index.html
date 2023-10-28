@@ -83,8 +83,12 @@
                 }
 
 
-                if (ballPositionY >= canvasHeight - ballRadius || ballPositionY <= ballRadius) {
+                if (ballPositionY <= ballRadius) {
                     ballDirectionY = -ballDirectionY;
+                }
+
+                if (ballPositionY >= canvasHeight - ballRadius) {
+                    gameOver();
                 }
 
                 if (
@@ -130,7 +134,20 @@
                 ballPositionY += ballDirectionY;
             }
 
-            let interval = setInterval(gameLoop, 10);
+            function gameOver() {
+                ctx.beginPath();
+
+                ctx.font = "48px Impact";
+                ctx.textAlign = 'center'
+                ctx.fillStyle = "red";
+                ctx.fillText("GAME OVER", canvasWidth / 2, canvasHeight / 2);
+
+                ctx.closePath();
+
+                clearInterval(gameLoopInterval);
+            }
+
+            let gameLoopInterval = setInterval(gameLoop, 10);
 
             document.addEventListener('keydown', keyHandler);
             document.addEventListener('keyup', keyHandler);
