@@ -31,13 +31,15 @@
             const paddleHeight = 12;
             const paddleMoveRatio = 6;
 
+            const ballInitDirectionY = -2;
+
             let paddlePositionX = canvasWidth / 2 - paddleWidth / 2;
-            let paddlePositionY = canvasHeight - 30;
+            let paddlePositionY = canvasHeight - paddleHeight;
 
             let ballPositionX = canvasWidth / 2;
-            let ballPositionY = paddlePositionY - ballRadius;
+            let ballPositionY = paddlePositionY - paddleHeight;
             let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
-            let ballDirectionY = -2;
+            let ballDirectionY = ballInitDirectionY;
 
             let arrowKeyLeftIsDown = false;
             let arrowKeyRightIsDown = false;
@@ -76,12 +78,21 @@
             }
 
             function ballHasCollision() {
-                if (ballPositionX + ballRadius >= canvasWidth || ballPositionX - ballRadius <= 0) {
+                if (ballPositionX >= canvasWidth - ballRadius || ballPositionX <= ballRadius) {
                     ballDirectionX = -ballDirectionX;
                 }
 
-                if (ballPositionY + ballRadius >= canvasHeight || ballPositionY - ballRadius <= 0) {
+
+                if (ballPositionY >= canvasHeight - ballRadius || ballPositionY <= ballRadius) {
                     ballDirectionY = -ballDirectionY;
+                }
+
+                if (
+                    ballPositionY - ballDirectionY >= paddlePositionY - paddleHeight
+                    && ballPositionX - ballDirectionX >= paddlePositionX
+                    && ballPositionX - ballDirectionX <= paddlePositionX + paddleWidth
+                ) {
+                    ballDirectionY = ballInitDirectionY;
                 }
             }
 
