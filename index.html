@@ -9,29 +9,32 @@
                 margin: 0;
             }
             canvas {
-                background: #9cf9ff;
                 display: block;
                 margin: 0 auto;
             }
         </style>
     </head>
     <body>
-        <canvas id="gameCanvas" height="320" width="480"></canvas>
+        <canvas id="gameCanvas"></canvas>
         <script>
             const canvas = document.getElementById("gameCanvas");
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
             const ctx = canvas.getContext("2d");
 
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
 
-            const ballRadius = 10;
-            const ballDirectionsX = [2, -2];
+            const ballRadius = 15;
+            const ballDirectionsX = [4, -4];
 
-            const paddleWidth = 90;
+            const paddleWidth = 120;
             const paddleHeight = 12;
-            const paddleMoveRatio = 6;
+            const paddleMoveRatio = 10;
 
-            const ballInitDirectionY = -2;
+            const ballInitDirectionY = -4;
 
             let paddlePositionX = canvasWidth / 2 - paddleWidth / 2;
             let paddlePositionY = canvasHeight - paddleHeight;
@@ -78,6 +81,10 @@
             }
 
             function ballHasCollision() {
+                if (ballPositionY >= canvasHeight - ballRadius) {
+                    gameOver();
+                }
+
                 if (ballPositionX >= canvasWidth - ballRadius || ballPositionX <= ballRadius) {
                     ballDirectionX = -ballDirectionX;
                 }
@@ -85,10 +92,6 @@
 
                 if (ballPositionY <= ballRadius) {
                     ballDirectionY = -ballDirectionY;
-                }
-
-                if (ballPositionY >= canvasHeight - ballRadius) {
-                    gameOver();
                 }
 
                 if (
@@ -121,7 +124,8 @@
             }
 
             function gameLoop() {
-                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                ctx.fillStyle = "rgba(156,249,255,0.3)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 drawBall();
                 drawPaddle();
@@ -137,7 +141,7 @@
             function gameOver() {
                 ctx.beginPath();
 
-                ctx.font = "48px Impact";
+                ctx.font = "80px Impact";
                 ctx.textAlign = 'center'
                 ctx.fillStyle = "red";
                 ctx.fillText("GAME OVER", canvasWidth / 2, canvasHeight / 2);
