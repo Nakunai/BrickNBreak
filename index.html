@@ -57,7 +57,7 @@
 
             let lives = livesInit;
 
-            function keyHandler(event) {
+            function keyEventHandler(event) {
                 let type = event.type;
                 let key = event.key;
 
@@ -197,8 +197,8 @@
 
             let gameLoopInterval = setInterval(gameLoop, 10);
 
-            document.addEventListener('keydown', keyHandler);
-            document.addEventListener('keyup', keyHandler);
+            document.addEventListener('keydown', keyEventHandler);
+            document.addEventListener('keyup', keyEventHandler);
         </script>
     </body>
 </html>
