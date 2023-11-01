@@ -65,6 +65,8 @@
             let score = scoreInit;
 
             let brickMap = [];
+            let isGameOver = false;
+
 
             for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
                 brickMap[brickColumnPointer] = [];
@@ -104,6 +106,7 @@
                 ctx.beginPath();
 
                 ctx.fillStyle = 'red';
+                ctx.strokeStyle = 'black';
                 ctx.bezierCurveTo(37.5, 18.5, 37.5, 12.5, 25, 12.5);
                 ctx.bezierCurveTo(10, 12.5, 10, 31, 10, 31);
                 ctx.bezierCurveTo(10, 40, 20, 51, 37.5, 60);
@@ -111,9 +114,11 @@
                 ctx.bezierCurveTo(65, 31, 65, 12.5, 50, 12.5);
                 ctx.bezierCurveTo(42.5, 12.5, 37.5, 16.5, 37.5, 20);
                 ctx.fill();
+                ctx.stroke();
 
                 ctx.font = "40px Impact";
                 ctx.fillText('x ' + lives, 70, 55);
+                ctx.strokeText('x ' + lives, 70, 55);
 
                 ctx.closePath();
             }
@@ -122,10 +127,11 @@
                 ctx.beginPath();
 
                 ctx.fillStyle = 'red';
-                ctx.fillStyle = 'red';
+                ctx.strokeStyle = 'black';
 
                 ctx.font = "40px Impact";
                 ctx.fillText('Score: ' + score, canvasWidth - 150, 55);
+                ctx.strokeText('Score: ' + score, canvasWidth - 150, 55);
 
                 ctx.closePath();
             }
@@ -152,8 +158,10 @@
                 ctx.beginPath();
 
                 ctx.fillStyle = "red";
+                ctx.strokeStyle = 'black';
                 ctx.arc(ballPositionX, ballPositionY, ballRadius, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.stroke();
 
                 ctx.closePath();
             }
@@ -161,9 +169,11 @@
             function drawPaddle() {
                 ctx.beginPath();
 
-                ctx.fillStyle = "black";
+                ctx.fillStyle = "#007eea";
+                ctx.strokeStyle = 'black';
                 ctx.rect(paddlePositionX, paddlePositionY, paddleWidth, paddleHeight)
                 ctx.fill();
+                ctx.stroke();
 
                 ctx.closePath();
             }
@@ -284,6 +294,10 @@
 
                 ballPositionX += ballDirectionX;
                 ballPositionY += ballDirectionY;
+
+                if (!isGameOver) {
+                    requestAnimationFrame(gameLoop);
+                }
             }
 
             function gameOver() {
@@ -293,14 +307,17 @@
                 ctx.font = "80px Impact";
                 ctx.textAlign = 'center'
                 ctx.fillStyle = "red";
+                ctx.strokeStyle = "black";
+
                 ctx.fillText("GAME OVER", canvasWidth / 2, canvasHeight / 2);
+                ctx.strokeText("GAME OVER", canvasWidth / 2, canvasHeight / 2);
 
                 ctx.closePath();
 
-                clearInterval(gameLoopInterval);
+                isGameOver = true;
             }
 
-            let gameLoopInterval = setInterval(gameLoop, 10);
+            gameLoop();
 
             document.addEventListener('keydown', keyEventHandler);
             document.addEventListener('keyup', keyEventHandler);
