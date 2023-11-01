@@ -33,7 +33,7 @@
 
             const paddleWidth = 120;
             const paddleHeight = 12;
-            const paddleMoveRatio = 10;
+            const paddleMoveRatio = 12;
 
             const paddleInitPositionX = canvasWidth / 2 - paddleWidth / 2;
             const paddleInitPositionY = canvasHeight - paddleHeight;
@@ -45,6 +45,7 @@
             const livesInit = 3;
             const scoreInit = 0;
 
+            const brickColors = ["#007eea"]
             const numberBrickPerLine = 20;
             const numberBrickPerColumn = 4;
             const brickWidth = canvas.width / numberBrickPerLine;
@@ -75,7 +76,9 @@
                     let x = brickLinePointer * brickWidth;
                     let y = brickColumnPointer * brickHeight;
 
-                    brickMap[brickColumnPointer].push({'x': x, 'y': y, 'visible': true});
+                    let color = brickColors[Math.floor(Math.random() * brickColors.length)];
+
+                    brickMap[brickColumnPointer].push({'x': x, 'y': y, 'visible': true, 'color': color});
                 }
             }
 
@@ -137,21 +140,19 @@
             }
 
             function drawBricks() {
-                ctx.beginPath();
-                ctx.fillStyle = "#007eea";
-                ctx.strokeStyle = 'black';
-
                 brickMap.forEach(function (column) {
                     column.forEach(function (brick) {
                         if (brick.visible) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = 'black';
+                            ctx.fillStyle = brick.color;
                             ctx.rect(brick.x, brick.y, brickWidth, brickHeight);
                             ctx.fill();
                             ctx.stroke();
+                            ctx.closePath();
                         }
                     });
                 });
-
-                ctx.closePath();
             }
 
             function drawBall() {
@@ -209,6 +210,7 @@
                     ballDirectionY = ballInitDirectionY;
                 }
 
+                // Collision on brick
                 brickMap.forEach(function (column) {
                     column.forEach(function (brick) {
                         if (!brick.visible) {
@@ -217,20 +219,26 @@
 
                         let brickCollision = false;
 
+                        // Collision on brick (left-right)
                         if (ballPositionY < brick.y + brickHeight && ballPositionY > brick.y) {
 
+                            // Collision on brick (left)
                             if (ballPositionX < brick.x && ballPositionX + ballRadius > brick.x) {
                                 brickCollision = true;
                                 ballDirectionX = -ballDirectionX;
                             }
 
+                            // Collision on brick (right)
                             if (ballPositionX > brick.x && ballPositionX - ballRadius < brick.x + brickWidth) {
                                 brickCollision = true;
                                 ballDirectionX = -ballDirectionX;
                             }
                         }
 
+                        // Collision on brick (top-bottom)
                         if (ballPositionX > brick.x && ballPositionX < brick.x + brickWidth) {
+
+                            // Collision on brick (top)
                             if (
                                 ballPositionY < brick.y
                                 && ballPositionY + ballRadius < brick.y + brickHeight
@@ -240,6 +248,7 @@
                                 ballDirectionY = -ballDirectionY;
                             }
 
+                            // Collision on brick (bottom)
                             if (
                                 ballPositionY > brick.y + brickHeight
                                 && ballPositionY - ballRadius < brick.y + brickHeight
