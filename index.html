@@ -43,6 +43,7 @@
             const ballInitDirectionY = -4;
 
             const livesInit = 3;
+            const scoreInit = 0;
 
             const numberBrickPerLine = 20;
             const numberBrickPerColumn = 4;
@@ -61,6 +62,7 @@
             let arrowKeyRightIsDown = false;
 
             let lives = livesInit;
+            let score = scoreInit;
 
             let brickMap = [];
 
@@ -112,6 +114,18 @@
 
                 ctx.font = "40px Impact";
                 ctx.fillText('x ' + lives, 70, 55);
+
+                ctx.closePath();
+            }
+
+            function drawScore() {
+                ctx.beginPath();
+
+                ctx.fillStyle = 'red';
+                ctx.fillStyle = 'red';
+
+                ctx.font = "40px Impact";
+                ctx.fillText('Score: ' + score, canvasWidth - 150, 55);
 
                 ctx.closePath();
             }
@@ -191,16 +205,18 @@
                             return;
                         }
 
+                        let brickCollision = false;
+
                         if (ballPositionY < brick.y + brickHeight && ballPositionY > brick.y) {
 
                             if (ballPositionX < brick.x && ballPositionX + ballRadius > brick.x) {
+                                brickCollision = true;
                                 ballDirectionX = -ballDirectionX;
-                                brick.visible = false;
                             }
 
                             if (ballPositionX > brick.x && ballPositionX - ballRadius < brick.x + brickWidth) {
+                                brickCollision = true;
                                 ballDirectionX = -ballDirectionX;
-                                brick.visible = false;
                             }
                         }
 
@@ -210,8 +226,8 @@
                                 && ballPositionY + ballRadius < brick.y + brickHeight
                                 && ballPositionY + ballRadius > brick.y
                             ) {
+                                brickCollision = true;
                                 ballDirectionY = -ballDirectionY;
-                                brick.visible = false;
                             }
 
                             if (
@@ -219,9 +235,14 @@
                                 && ballPositionY - ballRadius < brick.y + brickHeight
                                 && ballPositionY - ballRadius > brick.y
                             ) {
+                                brickCollision = true;
                                 ballDirectionY = -ballDirectionY;
-                                brick.visible = false;
                             }
+                        }
+
+                        if (brickCollision) {
+                            brick.visible = false;
+                            score += 1;
                         }
                     });
                 });
@@ -253,6 +274,7 @@
 
                 drawBricks();
                 drawLives();
+                drawScore();
                 drawPaddle();
                 drawBall();
 
