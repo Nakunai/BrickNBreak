@@ -71,7 +71,7 @@
                     let x = brickLinePointer * brickWidth;
                     let y = brickColumnPointer * brickHeight;
 
-                    brickMap[brickColumnPointer].push({'x': x, 'y': y });
+                    brickMap[brickColumnPointer].push({'x': x, 'y': y, 'visible': true});
                 }
             }
 
@@ -123,9 +123,11 @@
 
                 brickMap.forEach(function (column) {
                     column.forEach(function (brick) {
-                        ctx.rect(brick.x, brick.y, brickWidth, brickHeight);
-                        ctx.fill();
-                        ctx.stroke();
+                        if (brick.visible) {
+                            ctx.rect(brick.x, brick.y, brickWidth, brickHeight);
+                            ctx.fill();
+                            ctx.stroke();
+                        }
                     });
                 });
 
@@ -153,6 +155,7 @@
             }
 
             function ballHasCollision() {
+                // Collision on down (Game Over or -1 live)
                 if (ballPositionY >= canvasHeight - ballRadius) {
                     lives--;
 
@@ -163,21 +166,35 @@
                     resetPositions();
                 }
 
+                // Collision on walls (left | right)
                 if (ballPositionX >= canvasWidth - ballRadius || ballPositionX <= ballRadius) {
                     ballDirectionX = -ballDirectionX;
                 }
 
-
+                // Collision on top wall
                 if (ballPositionY <= ballRadius) {
                     ballDirectionY = -ballDirectionY;
                 }
 
+                // Collision on paddle
                 if (
                     ballPositionY - ballDirectionY >= paddlePositionY - paddleHeight
                     && ballPositionX - ballDirectionX >= paddlePositionX
                     && ballPositionX - ballDirectionX <= paddlePositionX + paddleWidth
                 ) {
                     ballDirectionY = ballInitDirectionY;
+                }
+
+                if (ballPositionY - ballRadius <= (numberBrickPerColumn * brickHeight)) {
+                    // Collision on brick
+                    brickMap.forEach(function (column) {
+                        column.forEach(function (brick) {
+                            if (ballPositionY - ballRadius <= brick.y + brickHeight && ballPositionX >= brick.x && ballPositionX <= brick.x + brickWidth && brick.visible) {
+                                brick.visible = false;
+                                ballDirectionY = -ballDirectionY;
+                            }
+                        });
+                    });
                 }
             }
 
