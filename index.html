@@ -44,6 +44,11 @@
 
             const livesInit = 3;
 
+            const numberBrickPerLine = 20;
+            const numberBrickPerColumn = 4;
+            const brickWidth = canvas.width / numberBrickPerLine;
+            const brickHeight = brickWidth / 2;
+
             let paddlePositionX = paddleInitPositionX;
             let paddlePositionY = paddleInitPositionY;
 
@@ -56,6 +61,21 @@
             let arrowKeyRightIsDown = false;
 
             let lives = livesInit;
+
+            let brickMap = [];
+
+            for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
+                brickMap[brickColumnPointer] = [];
+
+                for (let brickLinePointer = 0; brickLinePointer < numberBrickPerLine; brickLinePointer++) {
+                    let x = brickLinePointer * brickWidth;
+                    let y = brickColumnPointer * brickHeight;
+
+                    brickMap[brickColumnPointer].push({'x': x, 'y': y });
+                }
+            }
+
+            console.log(brickMap);
 
             function keyEventHandler(event) {
                 let type = event.type;
@@ -92,6 +112,22 @@
 
                 ctx.font = "40px Impact";
                 ctx.fillText('x ' + lives, 70, 55);
+
+                ctx.closePath();
+            }
+
+            function drawBricks() {
+                ctx.beginPath();
+                ctx.fillStyle = "#007eea";
+                ctx.strokeStyle = 'black';
+
+                brickMap.forEach(function (column) {
+                    column.forEach(function (brick) {
+                        ctx.rect(brick.x, brick.y, brickWidth, brickHeight);
+                        ctx.fill();
+                        ctx.stroke();
+                    });
+                });
 
                 ctx.closePath();
             }
@@ -169,6 +205,7 @@
                 ctx.fillStyle = "rgba(156,249,255,0.3)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+                drawBricks();
                 drawLives();
                 drawPaddle();
                 drawBall();
