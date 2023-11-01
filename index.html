@@ -185,17 +185,46 @@
                     ballDirectionY = ballInitDirectionY;
                 }
 
-                if (ballPositionY - ballRadius <= (numberBrickPerColumn * brickHeight)) {
-                    // Collision on brick
-                    brickMap.forEach(function (column) {
-                        column.forEach(function (brick) {
-                            if (ballPositionY - ballRadius <= brick.y + brickHeight && ballPositionX >= brick.x && ballPositionX <= brick.x + brickWidth && brick.visible) {
+                brickMap.forEach(function (column) {
+                    column.forEach(function (brick) {
+                        if (!brick.visible) {
+                            return;
+                        }
+
+                        if (ballPositionY < brick.y + brickHeight && ballPositionY > brick.y) {
+
+                            if (ballPositionX < brick.x && ballPositionX + ballRadius > brick.x) {
+                                ballDirectionX = -ballDirectionX;
                                 brick.visible = false;
-                                ballDirectionY = -ballDirectionY;
                             }
-                        });
+
+                            if (ballPositionX > brick.x && ballPositionX - ballRadius < brick.x + brickWidth) {
+                                ballDirectionX = -ballDirectionX;
+                                brick.visible = false;
+                            }
+                        }
+
+                        if (ballPositionX > brick.x && ballPositionX < brick.x + brickWidth) {
+                            if (
+                                ballPositionY < brick.y
+                                && ballPositionY + ballRadius < brick.y + brickHeight
+                                && ballPositionY + ballRadius > brick.y
+                            ) {
+                                ballDirectionY = -ballDirectionY;
+                                brick.visible = false;
+                            }
+
+                            if (
+                                ballPositionY > brick.y + brickHeight
+                                && ballPositionY - ballRadius < brick.y + brickHeight
+                                && ballPositionY - ballRadius > brick.y
+                            ) {
+                                ballDirectionY = -ballDirectionY;
+                                brick.visible = false;
+                            }
+                        }
                     });
-                }
+                });
             }
 
             function paddleHasMove() {
