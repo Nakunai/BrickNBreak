@@ -46,8 +46,11 @@
             const scoreInit = 0;
 
             const brickColors = ["#007eea"]
-            const numberBrickPerLine = 20;
-            const numberBrickPerColumn = 4;
+            //const numberBrickPerLine = 20;
+            //const numberBrickPerColumn = 4;
+            const numberBrickPerLine = 5;
+            const numberBrickPerColumn = 1;
+            const totalBricks = numberBrickPerLine * numberBrickPerColumn;
             const brickWidth = canvas.width / numberBrickPerLine;
             const brickHeight = brickWidth / 2;
 
@@ -66,8 +69,10 @@
             let lives = livesInit;
             let score = scoreInit;
 
+            let countBrickDestroyed = 0;
             let brickMap = [];
             let isGameOver = false;
+            let isGameWin = false;
 
 
             for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
@@ -263,7 +268,7 @@
                             brick.visible = false;
                             score += 1;
                             ballSpeed += 0.04;
-                            console.log(ballDirectionY, ballDirectionX);
+                            countBrickDestroyed++;
                         }
                     });
                 });
@@ -306,9 +311,11 @@
                 ballPositionX += ballDirectionX * ballSpeed;
                 ballPositionY += ballDirectionY * ballSpeed;
 
-                console.log(ballPositionX, ballPositionY);
+                if (countBrickDestroyed === totalBricks) {
+                    gameWin();
+                }
 
-                if (!isGameOver) {
+                if (!isGameOver && !isGameWin) {
                     requestAnimationFrame(gameLoop);
                 }
             }
@@ -328,6 +335,23 @@
                 ctx.closePath();
 
                 isGameOver = true;
+            }
+
+            function gameWin() {
+                ctx.beginPath();
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = "80px Impact";
+                ctx.textAlign = 'center'
+                ctx.fillStyle = "red";
+                ctx.strokeStyle = "black";
+
+                ctx.fillText("YOU WIN !", canvasWidth / 2, canvasHeight / 2);
+                ctx.strokeText("YOU WIN !", canvasWidth / 2, canvasHeight / 2);
+
+                ctx.closePath();
+
+                isGameWin = true;
             }
 
             gameLoop();
