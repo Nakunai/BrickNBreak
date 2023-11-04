@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
     <head>
         <meta charset="utf-8" />
         <title>Brick'n Break</title>
@@ -28,6 +28,12 @@
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
 
+            const startBtnWidth = 250;
+            const startBtnHeight = 70;
+            const startBtnRound = 15;
+            const startBtnPositionX = (canvasWidth - startBtnWidth) / 2;
+            const startBtnPositionY = canvasHeight / 2;
+
             const ballRadius = 15;
             const ballDirectionsX = [4, -4];
 
@@ -41,6 +47,7 @@
             const ballInitPositionX = canvasWidth / 2;
             const ballInitPositionY = paddleInitPositionY - paddleHeight;
             const ballInitDirectionY = -4;
+            const ballInitSpeed = 1;
 
             const livesInit = 3;
             const scoreInit = 0;
@@ -52,6 +59,9 @@
             const brickWidth = canvas.width / numberBrickPerLine;
             const brickHeight = brickWidth / 2;
 
+            let startBtnColor = "red";
+            let startBtnTextColor = "white";
+
             let paddlePositionX = paddleInitPositionX;
             let paddlePositionY = paddleInitPositionY;
 
@@ -59,7 +69,7 @@
             let ballPositionY = ballInitPositionY;
             let ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
             let ballDirectionY = ballInitDirectionY;
-            let ballSpeed = 1;
+            let ballSpeed = ballInitSpeed;
 
             let arrowKeyLeftIsDown = false;
             let arrowKeyRightIsDown = false;
@@ -69,9 +79,14 @@
 
             let countBrickDestroyed = 0;
             let brickMap = [];
+
             let isGameOver = false;
             let isGameWin = false;
+            let isGameStartScreen = true;
 
+            let mousePositionX = 0;
+            let mousePositionY = 0;
+            let mouseClick = false;
 
             for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
                 brickMap[brickColumnPointer] = [];
@@ -99,6 +114,12 @@
                 }
             }
 
+            function mouseClickEventHandler(event) {
+                let type = event.type;
+
+                mouseClick = type === "mousedown";
+            }
+
             function resetPositions() {
                 paddlePositionX = paddleInitPositionX;
                 ballPositionX = ballInitPositionX;
@@ -107,9 +128,45 @@
                 ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
             }
 
-            function drawLives() {
+            function drawStartGameTitle() {
                 ctx.beginPath();
 
+                ctx.font = "100px Impact";
+                ctx.textAlign = 'center'
+                ctx.fillStyle = "red";
+                ctx.strokeStyle = "black";
+
+                ctx.fillText("BRICK'N BREAK", canvasWidth / 2, canvasHeight / 3);
+                ctx.strokeText("BRICK'N BREAK", canvasWidth / 2, canvasHeight / 3);
+
+                ctx.closePath();
+            }
+
+            function drawStartButton() {
+                ctx.beginPath();
+
+                ctx.fillStyle = startBtnColor;
+                ctx.strokeStyle = "black";
+
+                ctx.roundRect(startBtnPositionX, startBtnPositionY, startBtnWidth, startBtnHeight, startBtnRound);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.font = "50px Impact";
+                ctx.textAlign = 'center'
+                ctx.fillStyle = startBtnTextColor;
+
+                ctx.fillText("START", canvasWidth / 2, canvasHeight / 2 + startBtnHeight - 15);
+                ctx.strokeText("START", canvasWidth / 2, canvasHeight / 2 + startBtnHeight - 15);
+
+                ctx.closePath();
+            }
+
+            function drawLives() {
+                ctx.beginPath();
+                ctx.beginPath();
+
+                ctx.textAlign = "left";
                 ctx.fillStyle = 'red';
                 ctx.strokeStyle = 'black';
                 ctx.bezierCurveTo(37.5, 18.5, 37.5, 12.5, 25, 12.5);
@@ -131,12 +188,13 @@
             function drawScore() {
                 ctx.beginPath();
 
+                ctx.textAlign = "center";
                 ctx.fillStyle = 'red';
                 ctx.strokeStyle = 'black';
 
                 ctx.font = "40px Impact";
-                ctx.fillText('Score: ' + score, canvasWidth - 150, 55);
-                ctx.strokeText('Score: ' + score, canvasWidth - 150, 55);
+                ctx.fillText('Score: ' + score, canvasWidth / 2, 55);
+                ctx.strokeText('Score: ' + score, canvasWidth / 2, 55);
 
                 ctx.closePath();
             }
@@ -182,6 +240,12 @@
             }
 
             function ballHasCollision() {
+                // Collision on down (game start screen)
+                if (isGameStartScreen && ballPositionY >= canvasHeight - ballRadius) {
+                    ballDirectionY = -ballDirectionY;
+                    return;
+                }
+
                 // Collision on down (Game Over or -1 live)
                 if (ballPositionY >= canvasHeight) {
                     lives--;
@@ -202,6 +266,10 @@
                 // Collision on top wall
                 if (ballPositionY <= ballRadius) {
                     ballDirectionY = -ballDirectionY;
+                }
+
+                if (isGameStartScreen) {
+                    return;
                 }
 
                 // Collision on paddle
@@ -292,14 +360,43 @@
                 }
             }
 
+            function handleGameStartScreen() {
+                if (!isGameStartScreen) {
+                    return;
+                }
+
+                drawStartGameTitle();
+                drawStartButton();
+
+                ballSpeed = 2;
+
+                let isMouseHoverBtn = isMouseHoverElement(startBtnPositionX, startBtnPositionY, startBtnWidth, startBtnHeight);
+
+                canvas.style.cursor = isMouseHoverBtn ? "pointer" : "auto";
+                startBtnColor = isMouseHoverBtn ? "white" : "red";
+                startBtnTextColor = isMouseHoverBtn ? "red" : "white";
+
+                if (isMouseHoverBtn && mouseClick) {
+                    isGameStartScreen = false;
+                    resetPositions();
+                    ballSpeed = ballInitSpeed;
+                    canvas.style.cursor = "auto";
+                }
+            }
+
             function gameLoop() {
                 ctx.fillStyle = "rgba(156,249,255,0.3)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                drawBricks();
-                drawLives();
-                drawScore();
-                drawPaddle();
+                handleGameStartScreen();
+
+                if (!isGameStartScreen) {
+                    drawBricks();
+                    drawLives();
+                    drawScore();
+                    drawPaddle();
+                }
+
                 drawBall();
 
                 paddleHasMove();
@@ -335,6 +432,21 @@
                 isGameOver = true;
             }
 
+            function isMouseHoverElement(x, y, w, h) {
+                let isMouseHover = false;
+
+                if (
+                    mousePositionX > x
+                    && mousePositionX < x + w
+                    && mousePositionY > y
+                    && mousePositionY < y + h
+                ) {
+                    isMouseHover = true;
+                }
+
+                return isMouseHover;
+            }
+
             function gameWin() {
                 ctx.beginPath();
 
@@ -356,6 +468,14 @@
 
             document.addEventListener('keydown', keyEventHandler);
             document.addEventListener('keyup', keyEventHandler);
+
+            document.addEventListener('mousemove', function (event) {
+                mousePositionX = event.x;
+                mousePositionY = event.y;
+            });
+
+            document.addEventListener('mouseup', mouseClickEventHandler);
+            document.addEventListener('mousedown', mouseClickEventHandler);
         </script>
     </body>
 </html>
