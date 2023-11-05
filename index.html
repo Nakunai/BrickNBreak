@@ -59,6 +59,8 @@
             const brickWidth = canvas.width / numberBrickPerLine;
             const brickHeight = brickWidth / 2;
 
+            const waitTimerInSecond = 3;
+
             let startBtnColor = "red";
             let startBtnTextColor = "white";
 
@@ -88,6 +90,11 @@
             let mousePositionY = 0;
             let mouseClick = false;
 
+            let isWaitTimerOn = false;
+            let currentWaitTimer = waitTimerInSecond;
+            let waitTimerStartAt;
+            let waitTimerSteps = [];
+
             for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
                 brickMap[brickColumnPointer] = [];
 
@@ -104,6 +111,10 @@
             function keyEventHandler(event) {
                 let type = event.type;
                 let key = event.key;
+
+                if (isWaitTimerOn) {
+                    return;
+                }
 
                 if ('ArrowLeft' === key) {
                     arrowKeyLeftIsDown = type === 'keydown';
@@ -255,6 +266,7 @@
                     }
 
                     resetPositions();
+                    initializeWaitTimer();
                     ballSpeed = 1;
                 }
 
@@ -360,6 +372,18 @@
                 }
             }
 
+            function initializeWaitTimer() {
+                isWaitTimerOn = true;
+                waitTimerStartAt = Date.now();
+                currentWaitTimer = waitTimerInSecond;
+
+                let timerPrevStep = waitTimerStartAt;
+
+                for (let i = 1; i <= waitTimerInSecond; i++) {
+                    waitTimerSteps.push(i * 1000 + timerPrevStep);
+                }
+            }
+
             function handleGameStartScreen() {
                 if (!isGameStartScreen) {
                     return;
@@ -378,10 +402,44 @@
 
                 if (isMouseHoverBtn && mouseClick) {
                     isGameStartScreen = false;
+                    initializeWaitTimer();
                     resetPositions();
                     ballSpeed = ballInitSpeed;
                     canvas.style.cursor = "auto";
                 }
+            }
+
+            function drawWaitTimer() {
+                ctx.beginPath();
+
+                ctx.font = "80px Impact";
+                ctx.textAlign = 'center'
+                ctx.fillStyle = "red";
+                ctx.strokeStyle = "black";
+
+                let timer = currentWaitTimer === 0 ? "GO !" : currentWaitTimer.toString();
+
+                ctx.fillText(timer, canvasWidth / 2, canvasHeight / 2);
+                ctx.strokeText(timer, canvasWidth / 2, canvasHeight / 2);
+
+                ctx.closePath();
+            }
+
+            function handleWaitTimer() {
+                if (!isWaitTimerOn) {
+                    return;
+                }
+
+                if (Date.now() >= waitTimerSteps[0]) {
+                    currentWaitTimer--;
+                    waitTimerSteps.shift();
+                }
+
+                if (currentWaitTimer === 0) {
+                    isWaitTimerOn = false;
+                }
+
+                drawWaitTimer();
             }
 
             function gameLoop() {
@@ -389,6 +447,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 handleGameStartScreen();
+                handleWaitTimer();
 
                 if (!isGameStartScreen) {
                     drawBricks();
@@ -403,8 +462,10 @@
                 paddleHasCollision();
                 ballHasCollision();
 
-                ballPositionX += ballDirectionX * ballSpeed;
-                ballPositionY += ballDirectionY * ballSpeed;
+                if (!isWaitTimerOn) {
+                    ballPositionX += ballDirectionX * ballSpeed;
+                    ballPositionY += ballDirectionY * ballSpeed;
+                }
 
                 if (countBrickDestroyed === totalBricks) {
                     gameWin();
