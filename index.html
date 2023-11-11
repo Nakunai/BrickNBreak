@@ -61,6 +61,12 @@
 
             const waitTimerInSecond = 3;
 
+            const defaultBtnColor = "red";
+            const defaultBtnTextColor = "white";
+
+            const defaultBtnHoverColor = "white";
+            const defaultBtnHoverTextColor = "red";
+
             let startBtnColor = "red";
             let startBtnTextColor = "white";
 
@@ -139,6 +145,27 @@
                 ballDirectionX = ballDirectionsX[Math.floor(Math.random() * 2)];
             }
 
+            function resetGame() {
+                canvas.style.cursor = "auto";
+                resetPositions();
+                score = scoreInit;
+                lives = livesInit;
+                ballSpeed = ballInitSpeed;
+
+                for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
+                    brickMap[brickColumnPointer] = [];
+
+                    for (let brickLinePointer = 0; brickLinePointer < numberBrickPerLine; brickLinePointer++) {
+                        let x = brickLinePointer * brickWidth;
+                        let y = brickColumnPointer * brickHeight;
+
+                        let color = brickColors[Math.floor(Math.random() * brickColors.length)];
+
+                        brickMap[brickColumnPointer].push({'x': x, 'y': y, 'visible': true, 'color': color});
+                    }
+                }
+            }
+
             function drawStartGameTitle() {
                 ctx.beginPath();
 
@@ -149,6 +176,28 @@
 
                 ctx.fillText("BRICK'N BREAK", canvasWidth / 2, canvasHeight / 3);
                 ctx.strokeText("BRICK'N BREAK", canvasWidth / 2, canvasHeight / 3);
+
+                ctx.closePath();
+            }
+
+            function drawButton(positionX, positionY, width, height, text, buttonColor, textColor) {
+                ctx.beginPath();
+
+                ctx.fillStyle = buttonColor;
+                ctx.strokeStyle = "black";
+
+                ctx.roundRect(positionX, positionY, width, height, startBtnRound);
+                ctx.fill();
+                ctx.stroke();
+
+                let fontSize = 40;
+
+                ctx.font = fontSize + "px Impact";
+                ctx.textAlign = 'center'
+                ctx.fillStyle = textColor;
+
+                ctx.fillText(text, positionX + width / 2, positionY + (height / 2) + (fontSize - 10) / 2);
+                ctx.strokeText(text, positionX + width / 2, positionY + (height / 2) + (fontSize - 10) / 2);
 
                 ctx.closePath();
             }
@@ -262,12 +311,14 @@
                     lives--;
 
                     if (lives === 0) {
-                        gameOver();
+                        isGameOver = true;
                     }
 
-                    resetPositions();
-                    initializeWaitTimer();
-                    ballSpeed = 1;
+                    if (!isGameOver) {
+                        resetPositions();
+                        initializeWaitTimer();
+                        ballSpeed = 1;
+                    }
                 }
 
                 // Collision on walls (left | right)
@@ -446,51 +497,115 @@
                 ctx.fillStyle = "rgba(156,249,255,0.3)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+                handleGameOver();
                 handleGameStartScreen();
                 handleWaitTimer();
 
-                if (!isGameStartScreen) {
-                    drawBricks();
-                    drawLives();
-                    drawScore();
-                    drawPaddle();
+                if (!isGameOver) {
+                    if (!isGameStartScreen) {
+                        drawBricks();
+                        drawLives();
+                        drawScore();
+                        drawPaddle();
+                    }
+
+                    drawBall();
+
+                    paddleHasMove();
+                    paddleHasCollision();
+                    ballHasCollision();
+
+                    if (!isWaitTimerOn) {
+                        ballPositionX += ballDirectionX * ballSpeed;
+                        ballPositionY += ballDirectionY * ballSpeed;
+                    }
+
+                    if (countBrickDestroyed === totalBricks) {
+                        gameWin();
+                    }
                 }
 
-                drawBall();
-
-                paddleHasMove();
-                paddleHasCollision();
-                ballHasCollision();
-
-                if (!isWaitTimerOn) {
-                    ballPositionX += ballDirectionX * ballSpeed;
-                    ballPositionY += ballDirectionY * ballSpeed;
-                }
-
-                if (countBrickDestroyed === totalBricks) {
-                    gameWin();
-                }
-
-                if (!isGameOver && !isGameWin) {
+                if (!isGameWin) {
                     requestAnimationFrame(gameLoop);
                 }
             }
 
-            function gameOver() {
+            function handleMouseHover(element, cursorStyle, isHover) {
+                let isMouseHover = isMouseHoverElement(element.positionX, element.positionY, element.width, element.height);
+
+                element.color = isMouseHover ? element.hoverColor : element.color;
+                element.textColor = isMouseHover ? element.hoverTextColor : element.textColor;
+
+                if (!isMouseHover && !isHover) {
+                    canvas.style.cursor = "auto";
+                }
+
+                if (isMouseHover) {
+                    canvas.style.cursor = cursorStyle;
+                }
+
+                return isMouseHover;
+            }
+
+            function handleGameOver() {
+                if (!isGameOver) {
+                    return;
+                }
+
                 ctx.beginPath();
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.font = "80px Impact";
+                ctx.font = "100px Impact";
                 ctx.textAlign = 'center'
                 ctx.fillStyle = "red";
                 ctx.strokeStyle = "black";
 
-                ctx.fillText("GAME OVER", canvasWidth / 2, canvasHeight / 2);
-                ctx.strokeText("GAME OVER", canvasWidth / 2, canvasHeight / 2);
+                ctx.fillText("GAME OVER", canvasWidth / 2, canvasHeight / 3);
+                ctx.strokeText("GAME OVER", canvasWidth / 2, canvasHeight / 3);
+
+                let retryBtn = {
+                    'positionX': (canvasWidth - 250) / 2,
+                    'positionY': canvasHeight / 2,
+                    'width': 250,
+                    'height': 70,
+                    'color': defaultBtnColor,
+                    'textColor': defaultBtnTextColor,
+                    'hoverColor': defaultBtnHoverColor,
+                    'hoverTextColor': defaultBtnHoverTextColor,
+                }
+
+                let isHover = false;
+
+                isHover = handleMouseHover(retryBtn, "pointer", isHover)
+                drawButton(retryBtn.positionX, retryBtn.positionY, retryBtn.width, retryBtn.height, "RETRY", retryBtn.color, retryBtn.textColor);
+
+                if (isHover && mouseClick) {
+                    resetGame();
+                    isGameOver = false;
+                    initializeWaitTimer();
+                }
+
+                let quitBtn = {
+                    'positionX': (canvasWidth - 250) / 2,
+                    'positionY': canvasHeight / 1.65,
+                    'width': 250,
+                    'height': 70,
+                    'color': defaultBtnColor,
+                    'textColor': defaultBtnTextColor,
+                    'hoverColor': defaultBtnHoverColor,
+                    'hoverTextColor': defaultBtnHoverTextColor,
+                }
+
+                isHover = handleMouseHover(quitBtn, "pointer", isHover)
+                drawButton(quitBtn.positionX, quitBtn.positionY, quitBtn.width, quitBtn.height, "QUIT", quitBtn.color, quitBtn.textColor);
+
+                if (isHover && mouseClick) {
+                    resetGame();
+                    isGameOver = false;
+                    isGameStartScreen = true;
+                }
 
                 ctx.closePath();
-
-                isGameOver = true;
             }
 
             function isMouseHoverElement(x, y, w, h) {
