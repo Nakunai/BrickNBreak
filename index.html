@@ -101,6 +101,8 @@
             let waitTimerStartAt;
             let waitTimerSteps = [];
 
+            let paddleMovement = false;
+
             for (let brickColumnPointer = 0; brickColumnPointer < numberBrickPerColumn; brickColumnPointer++) {
                 brickMap[brickColumnPointer] = [];
 
@@ -117,10 +119,6 @@
             function keyEventHandler(event) {
                 let type = event.type;
                 let key = event.key;
-
-                if (isWaitTimerOn) {
-                    return;
-                }
 
                 if ('ArrowLeft' === key) {
                     arrowKeyLeftIsDown = type === 'keydown';
@@ -404,6 +402,11 @@
             }
 
             function paddleHasMove() {
+
+                if (!paddleMovement) {
+                    return;
+                }
+
                 if (arrowKeyLeftIsDown) {
                     paddlePositionX -= paddleMoveRatio;
                 }
@@ -425,6 +428,7 @@
 
             function initializeWaitTimer() {
                 isWaitTimerOn = true;
+                paddleMovement = false;
                 waitTimerStartAt = Date.now();
                 currentWaitTimer = waitTimerInSecond;
 
@@ -488,6 +492,7 @@
 
                 if (currentWaitTimer === 0) {
                     isWaitTimerOn = false;
+                    paddleMovement = true;
                 }
 
                 drawWaitTimer();
